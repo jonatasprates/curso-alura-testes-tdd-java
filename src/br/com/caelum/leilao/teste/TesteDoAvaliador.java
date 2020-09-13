@@ -86,7 +86,7 @@ public class TesteDoAvaliador {
         	));
     }
 	
-	@Test(expected=RuntimeException.class) 
+	@Test(expected=RuntimeException.class) // Só ficará verde se a execção for lançada expected=RuntimeException.class subistitui o try cath
 	public void naoDeveAvaliarLeiloesSemNenhumLanceDado() {
 			Leilao leilao = new CriadorDeLeilao().para("Playstation 3 Novo").constroi();
 			
