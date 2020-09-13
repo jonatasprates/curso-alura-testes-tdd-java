@@ -1,13 +1,12 @@
 package br.com.caelum.leilao.teste;
 
 import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 import java.util.List;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import br.com.caelum.leilao.dominio.Lance;
@@ -16,13 +15,9 @@ import br.com.caelum.leilao.dominio.Usuario;
 import br.com.caelum.leilao.servico.Avaliador;
 import br.com.caelum.leilao.servico.CriadorDeLeilao;
 
-/*
- * Ao contrário do @Before, métodos anotados com @After são executados após a execução do método de teste.
-   Utilizamos métodos @After quando nossos testes consomem recursos que precisam ser finalizados. 
-   Exemplos podem ser testes que acessam banco de dados, abrem arquivos, abrem sockets, e etc.
-   
-   Métodos anotados com @BeforeClass são executados apenas uma vez, antes de todos os métodos de teste.
-   O método anotado com @AfterClass, por sua vez, é executado uma vez, após a execução do último método de teste da classe.
+/* assertEquals(esperado, calculado) para podermos inverter assertEquals(calculado, esperado) utilizamo um framework chamado Hamcrest: assertThat
+ * De: assertEquals(250.0, leiloeiro.getMenorLance(), 0.00001)
+ * Para: assertThat(leiloeiro.getMenorLance(), equalTo(250.0));
  */
 
 public class TesteDoAvaliador {
@@ -39,21 +34,6 @@ public class TesteDoAvaliador {
 		this.jose = new Usuario("José");
 		this.maria = new Usuario("Maria");
 	}
-	
-	@After
-	public void finaliza() {
-	  System.out.println("fim");
-	}
-	
-	@BeforeClass
-	public static void testandoBeforeClass() {
-	  System.out.println("before class");
-	}
-
-	@AfterClass
-	public static void testandoAfterClass() {
-	  System.out.println("after class");
-	}
 
     @Test
     public void deveEntenderLancesEmOrdemCrescente() {
@@ -67,8 +47,8 @@ public class TesteDoAvaliador {
 
         leiloeiro.avalia(leilao);
 
-        assertEquals(400.0, leiloeiro.getMaiorLance(), 0.00001);
-        assertEquals(250.0, leiloeiro.getMenorLance(), 0.00001);
+        assertThat(leiloeiro.getMaiorLance(), equalTo(400.0));
+        assertThat(leiloeiro.getMenorLance(), equalTo(250.0));
     }
 
     @Test
@@ -98,9 +78,19 @@ public class TesteDoAvaliador {
 
         List<Lance> maiores = leiloeiro.getTresMaiores();
         assertEquals(3, maiores.size());
-        assertEquals(400.0, maiores.get(0).getValor(), 0.00001);
-        assertEquals(300.0, maiores.get(1).getValor(), 0.00001);
-        assertEquals(200.0, maiores.get(2).getValor(), 0.00001);
+        
+        assertThat(maiores, hasItems(
+        		new Lance(maria, 400),
+        		new Lance(joao, 300),
+        		new Lance(maria, 200)
+        	));
     }
+	
+	@Test(expected=RuntimeException.class) 
+	public void naoDeveAvaliarLeiloesSemNenhumLanceDado() {
+			Leilao leilao = new CriadorDeLeilao().para("Playstation 3 Novo").constroi();
+			
+			leiloeiro.avalia(leilao);
+	}
 	
 }
